@@ -13,37 +13,35 @@ def generate_launch_description() -> LaunchDescription:
     arg = DeclareLaunchArgument('vehicle_name')
     launch_description.add_action(arg)
 
-    group = GroupAction(
-        [
-            PushRosNamespace(LaunchConfiguration('vehicle_name')),
-            Node(
-                executable='depth_calculator.py',
-                package='depth_control',
-                parameters=[
-                    {
-                        'use_sim_time': LaunchConfiguration('use_sim_time'),
-                    },
-                ],
-            ),
-            Node(
-                executable='depth_controller.py',
-                package='depth_control',
-                parameters=[
-                    {
-                        'use_sim_time': LaunchConfiguration('use_sim_time'),
-                    },
-                ],
-            ),
-            Node(
-                executable='depth_setpoint.py',
-                package='depth_control',
-                parameters=[
-                    {
-                        'use_sim_time': LaunchConfiguration('use_sim_time'),
-                    },
-                ],
-            ),
-        ]
-    )
+    group = GroupAction([
+        PushRosNamespace(LaunchConfiguration('vehicle_name')),
+        Node(
+            executable='depth_calculator.py',
+            package='depth_control_solution',
+            parameters=[
+                {
+                    'use_sim_time': LaunchConfiguration('use_sim_time'),
+                },
+            ],
+        ),
+        Node(
+            executable='depth_controller.py',
+            package='depth_control_solution',
+            parameters=[
+                {
+                    'use_sim_time': LaunchConfiguration('use_sim_time'),
+                },
+            ],
+        ),
+        Node(
+            executable='depth_setpoint.py',
+            package='depth_control_solution',
+            parameters=[
+                {
+                    'use_sim_time': LaunchConfiguration('use_sim_time'),
+                },
+            ],
+        ),
+    ])
     launch_description.add_action(group)
     return launch_description

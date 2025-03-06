@@ -2,8 +2,7 @@ from launch_ros.actions import Node
 
 from launch import LaunchDescription
 from launch.actions import (
-    DeclareLaunchArgument,
-)
+    DeclareLaunchArgument, )
 from launch.substitutions import LaunchConfiguration
 
 
@@ -16,7 +15,7 @@ def generate_launch_description() -> LaunchDescription:
 
     action = Node(
         executable='depth_calculator.py',
-        package='depth_control',
+        package='depth_control_solution',
         namespace=LaunchConfiguration('vehicle_name'),
         parameters=[
             {

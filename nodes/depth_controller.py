@@ -12,15 +12,16 @@ from rclpy.node import Node
 
 
 class DepthControlNode(Node):
+
     def __init__(self):
         super().__init__(node_name='depth_controller')
 
         self.current_setpoint = 0.0
         self.current_depth = 0.0
 
-        self.thrust_pub = self.create_publisher(
-            msg_type=ActuatorSetpoint, topic='thrust_setpoint', qos_profile=1
-        )
+        self.thrust_pub = self.create_publisher(msg_type=ActuatorSetpoint,
+                                                topic='thrust_setpoint',
+                                                qos_profile=1)
 
         self.setpoint_sub = self.create_subscription(
             msg_type=Float64Stamped,
@@ -60,9 +61,8 @@ class DepthControlNode(Node):
         timestamp = rclpy.time.Time.from_msg(depth_msg.header.stamp)
         self.publish_vertical_thrust(thrust=thrust, timestamp=timestamp)
 
-    def publish_vertical_thrust(
-        self, thrust: float, timestamp: rclpy.time.Time
-    ) -> None:
+    def publish_vertical_thrust(self, thrust: float,
+                                timestamp: rclpy.time.Time) -> None:
         msg = ActuatorSetpoint()
         # we want to set the vertical thrust exlusively. mask out xy-components.
         msg.ignore_x = True
