@@ -14,6 +14,13 @@ class DepthCalculator(Node):
     def __init__(self):
         super().__init__(node_name='depth_calculator')
 
+        # Parameters
+        self.declare_parameter('water_density', 1000.0)     # kg/m^3
+        self.declare_parameter('gravity', 9.80665)          # m/s^2
+        self.declare_parameter('surface_pressure', 101325.) # Pa
+        self.declare_parameter('offset', -0.20)             # m
+
+
         qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
@@ -32,31 +39,31 @@ class DepthCalculator(Node):
 
     def on_pressure(self, pressure_msg: FluidPressure) -> None:
         pressure = pressure_msg.fluid_pressure
-        # TODO: you can remove this logging function, when you are done with the
-        # depth calculator implementation.
-        self.get_logger().info(
-            f'Hello, I received a pressure of {pressure} Pa. '
-            'I need to calculate the depth based on this measurement.',
-            throttle_duration_sec=1,
-        )
 
-        # TODO: implement the following pressure_to_depth function.
         depth = self.pressure_to_depth(pressure=pressure)
         now = self.get_clock().now()
         self.publish_depth_msg(depth=depth, now=now)
 
     def publish_depth_msg(self, depth: float, now: rclpy.time.Time) -> None:
         msg = DepthStamped()
-        # Let's add a time stamp
         msg.header.stamp = now.to_msg()
-        # and populate the depth field
         msg.depth = depth
         self.depth_pub.publish(msg)
 
     def pressure_to_depth(self, pressure: float) -> float:
-        # TODO: implement the required depth calculation
-        depth = pressure  # this does not seem to be to correct calculation
-        return depth
+        rho = float(self.get_parameter('water_density').value)
+        g = float(self.get_parameter('gravity').value)
+        p0 = float(self.get_parameter('surface_pressure').value)
+        offset = float(self.get_parameter('offset').value)
+
+        if rho <= 0.0 or g <= 0.0:
+            self.get_logger().warn(
+                f'Invalid parameters: water_density={rho}, gravity={g}. Returning depth=0.0'
+            )
+            return 0.0
+
+        depth = -(pressure - p0) / (rho * g) # depth is negative down
+        return float(depth + offset)
 
 
 def main():
